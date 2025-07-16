@@ -344,3 +344,77 @@ curl -X GET http://localhost:3000/projects/get-project/project_id \
 - Only authenticated users can create, view, or update projects.
 - Project names must be unique.
 - Collaborators are managed
+
+---
+## Real-time Communication (Socket.io)
+
+The backend supports real-time features using Socket.io. This enables future enhancements such as live chat, notifications, or collaborative editing within projects.
+
+### How Socket.io Works in AI_AGENT
+
+- **Socket Server:**  
+  The server is initialized in `server.js` and listens for connections.  
+  JWT authentication is enforced for all socket connections.
+
+- **Authentication:**  
+  Clients must provide a valid JWT token when connecting via Socket.io.  
+  Example (frontend):
+  ```js
+  import socket from 'socket.io-client';
+
+  const socketInstance = socket(import.meta.env.VITE_API_URL, {
+    auth: {
+      token: localStorage.getItem('token'),
+    }
+  });
+  ```
+
+- **Events:**  
+  You can emit and listen for custom events.  
+  Example:
+  ```js
+  // Send a message
+  socketInstance.emit('event', { message: 'Hello' });
+
+  // Receive a message
+  socketInstance.on('event', (data) => {
+    console.log(data);
+  });
+  ```
+
+- **Backend Example:**
+  ```js
+  io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('event', (data) => {
+      // handle event
+    });
+
+    socket.on('disconnect', () => {
+      // handle disconnect
+    });
+  });
+  ```
+
+### Example Socket Connection Flow
+
+1. **Frontend initializes socket:**
+   ```js
+   import { initializeSocket } from '../config/socket';
+   const socket = initializeSocket(projectId);
+   ```
+
+2. **JWT is sent for authentication.**
+3. **Backend verifies JWT and attaches user info to socket.**
+4. **Events can be sent and received in real-time.**
+
+---
+
+## Notes
+
+- All socket connections require a valid JWT token.
+- Real-time features are ready for extension (chat, notifications, etc.).
+- See `server.js` and `src/config/socket.js` for implementation details.
+
+---

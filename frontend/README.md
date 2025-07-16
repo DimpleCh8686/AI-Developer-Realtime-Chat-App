@@ -136,6 +136,7 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
 - **Add Collaborators:** Add other users to your project.
 - **Side Panel:** View a list of all collaborators in a project.
 - **Chat UI (UI only):** Placeholder for future messaging features.
+- **Real-time Communication (Socket.io ready):** Socket setup for future chat/collaboration.
 
 ---
 
@@ -208,6 +209,56 @@ All collaborators for the project are listed here.
       "collaborator_id_2"
     ]
   }
+  ```
+
+---
+
+## Real-time Communication (Socket.io)
+
+The frontend is ready for real-time features (like chat or live collaboration) using Socket.io.  
+Socket logic is in `src/config/socket.js`.
+
+### Socket Usage
+
+- **Initialize Socket Connection:**
+
+  ```js
+  import { initializeSocket } from '../config/socket';
+
+  const socket = initializeSocket(projectId);
+  ```
+
+- **Send a Message:**
+
+  ```js
+  import { sendMessage } from '../config/socket';
+  sendMessage('eventName', { message: 'Hello' });
+  ```
+
+- **Receive a Message:**
+
+  ```js
+  import { receiveMessage } from '../config/socket';
+
+  receiveMessage('eventName', (data) => {
+    // handle incoming data
+  });
+  ```
+
+- **Example:**
+
+  ```js
+  // Connect to socket when project loads
+  useEffect(() => {
+    const socket = initializeSocket(project._id);
+
+    receiveMessage('chat', (msg) => {
+      console.log('Received:', msg);
+      });
+
+    // Cleanup on unmount
+    return () => socket.disconnect();
+  }, [project._id]);
   ```
 
 ---
