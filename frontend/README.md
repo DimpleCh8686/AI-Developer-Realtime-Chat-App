@@ -130,26 +130,142 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
 ### 3. Project Details
 
 - **Screen:** `src/screens/Project.jsx`
-- **Features:**
-  - View project details and collaborators.
-  - (Extendable: Add/remove collaborators, manage tasks, etc.)
+## Features
+
+- **View Project Details:** See the project name and its collaborators.
+- **Add Collaborators:** Add other users to your project.
+- **Side Panel:** View a list of all collaborators in a project.
+- **Chat UI (UI only):** Placeholder for future messaging features.
 
 ---
 
-## API Integration
+## How It Works
 
-- **Axios Configuration:**  
-  Located in `src/config/axios.js`.  
-  Automatically attaches JWT token from `localStorage` to requests.
+### 1. Viewing a Project
 
-  ```js
-  const axiosInstance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
-      headers: {
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-      }
-  })
+When you click on a project from the Home screen, you are navigated to the Project screen. The project details and collaborators are fetched from the backend.
+
+- **API Call:**  
+  ```sh
+  GET /projects/get-project/:projectId
   ```
+- **Example Response:**
+  ```json
+  {
+    "project": {
+      "_id": "project_id",
+      "name": "my first project",
+      "users": [
+        { "_id": "user_id", "email": "user@example.com" },
+        { "_id": "collaborator_id", "email": "collab@example.com" }
+      ]
+    }
+  }
+  ```
+
+---
+
+### 2. Viewing Collaborators
+
+Click the group icon in the top-right to open the side panel.  
+All collaborators for the project are listed here.
+
+---
+
+### 3. Adding Collaborators
+
+1. Click **Add collaborator**.
+2. A modal opens with a list of users (excluding yourself).
+3. Select one or more users.
+4. Click **Add Collaborators**.
+
+- **API Call:**  
+  ```sh
+  PUT /projects/add-user
+  ```
+- **Request Body Example:**
+  ```json
+  {
+    "projectId": "project_id",
+    "users": ["collaborator_id_1", "collaborator_id_2"]
+  }
+  ```
+- **Example cURL:**
+  ```sh
+  curl -X PUT http://localhost:3000/projects/add-user \
+    -H "Authorization: Bearer <JWT_TOKEN>" \
+    -H "Content-Type: application/json" \
+    -d '{"projectId":"project_id","users":["collaborator_id_1","collaborator_id_2"]}'
+  ```
+- **Response Example:**
+  ```json
+  {
+    "_id": "project_id",
+    "name": "my first project",
+    "users": [
+      "user_id",
+      "collaborator_id_1",
+      "collaborator_id_2"
+    ]
+  }
+  ```
+
+---
+
+## UI Structure
+
+- **Left Panel:** Project info, chat placeholder, and collaborator side panel.
+- **Main Area:** (Extendable for chat, tasks, etc.)
+- **Modal:** For selecting and adding collaborators.
+
+---
+
+## Example Workflow
+
+1. **Open a project** from the dashboard.
+2. **View collaborators** in the side panel.
+3. **Add new collaborators** using the modal.
+4. **See the updated list** of collaborators instantly.
+
+---
+
+## Notes
+
+- Only authenticated users can access this screen.
+- Collaborator management is done via user IDs.
+- The chat area is currently a UI placeholder.
+
+---
+
+## Extending
+
+- Implement real-time chat using WebSockets.
+- Add project task management.
+- Allow removing collaborators.
+
+---
+
+## Related API Endpoints
+
+- `GET /projects/get-project/:projectId` — Get project details.
+- `PUT /projects/add-user` — Add collaborators to a project.
+- `GET /users/all` — List all users (for adding as collaborators).
+
+---
+
+## Example: Add Collaborator Flow
+
+1. **User opens project:**  
+   Project details and collaborators are loaded.
+
+2. **User clicks "Add collaborator":**  
+   Modal opens with user list.
+
+3. **User selects users and submits:**  
+   API call is made to add users.
+
+4. **Collaborators list updates:**  
+   Side panel shows new collaborators.
 
 ---
 
@@ -159,14 +275,6 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
 - Custom styles can be added in `src/App.css` and `src/index.css`.
 
 ---
-
-## Example Workflow
-
-1. **Register a new user**
-2. **Login with your credentials**
-3. **Create a new project**
-4. **View your projects on the dashboard**
-5. **Click a project to see details**
 
 ---
 
