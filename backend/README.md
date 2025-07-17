@@ -365,6 +365,9 @@ The backend supports real-time features using Socket.io. This enables future enh
   const socketInstance = socket(import.meta.env.VITE_API_URL, {
     auth: {
       token: localStorage.getItem('token'),
+    },
+    query: {
+      projectId: 'your_project_id'
     }
   });
   ```
@@ -374,10 +377,10 @@ The backend supports real-time features using Socket.io. This enables future enh
   Example:
   ```js
   // Send a message
-  socketInstance.emit('event', { message: 'Hello' });
+  socketInstance.emit('project-message', { message: 'Hello' });
 
   // Receive a message
-  socketInstance.on('event', (data) => {
+  socketInstance.on('project-message', (data) => {
     console.log(data);
   });
   ```
@@ -387,12 +390,14 @@ The backend supports real-time features using Socket.io. This enables future enh
   io.on('connection', (socket) => {
     console.log('A user connected');
 
-    socket.on('event', (data) => {
-      // handle event
+    socket.on('project-message', (data) => {
+      // Broadcast to all users in the same project room
+      socket.broadcast.to(socket.roomId).emit('project-message', data);
     });
 
     socket.on('disconnect', () => {
-      // handle disconnect
+      console.log('user disconnected');
+      socket.leave(socket.roomId);
     });
   });
   ```
@@ -407,14 +412,55 @@ The backend supports real-time features using Socket.io. This enables future enh
 
 2. **JWT is sent for authentication.**
 3. **Backend verifies JWT and attaches user info to socket.**
-4. **Events can be sent and received in real-time.**
+4. **Socket joins the project room.**
+5. **Events can be sent and received in real-time.**
 
 ---
 
 ## Notes
 
-- All socket connections require a valid JWT token.
-- Real-time features are ready for extension (chat, notifications, etc.).
+- All socket connections require a valid JWT token and a valid project ID.
+- Real-time features are ready for extension (chat, notifications, collaborative editing, etc.).
 - See `server.js` and `src/config/socket.js` for implementation details.
+- Messages are scoped to project rooms, so only collaborators in the same project receive updates.
 
 ---
+
+## Example Use Case
+
+- **Live Chat:**  
+  Collaborators can send and receive messages in real-time within a project.
+
+- **Notifications:**  
+  Notify users when someone joins, leaves, or updates the project.
+
+- **Collaboration:**  
+  Extend events for real-time editing or task updates.
+
+---
+
+## Extending
+
+To add new real-time features, define new event names and handlers in both the frontend and backend.  
+For example, to add a "task-update" event:
+
+**Frontend:**
+```js
+sendMessage('task-update', { taskId, status: 'done' });
+receiveMessage('task-update', (data) => {
+  // handle task update
+});
+```
+
+**Backend:**
+```js
+socket.on('task-update', (data) => {
+  socket.broadcast.to(socket.roomId).emit('task-update', data);
+});
+```
+
+---
+
+## License
+
+ISC
