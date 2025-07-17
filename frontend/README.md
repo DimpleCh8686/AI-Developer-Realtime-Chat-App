@@ -215,7 +215,11 @@ All collaborators for the project are listed here.
 
 ## Real-time Communication (Socket.io)
 
-The frontend is ready for real-time features (like chat or live collaboration) using Socket.io.  
+The frontend is ready for real-time features (like chat or live collaboration) using Socket.io. When a user opens a project, a socket connection is established for that project. This enables instant messaging between collaborators in the same project room.
+
+- **Live Chat:** Users can send and receive messages in real-time.
+- **Collaboration Ready:** The socket setup allows for future features like notifications, collaborative editing, and live updates.
+- **Room-based Messaging:** Only users in the same project receive messages and updates.
 Socket logic is in `src/config/socket.js`.
 
 ### Socket Usage
@@ -285,14 +289,6 @@ Socket logic is in `src/config/socket.js`.
 - Only authenticated users can access this screen.
 - Collaborator management is done via user IDs.
 - The chat area is currently a UI placeholder.
-
----
-
-## Extending
-
-- Implement real-time chat using WebSockets.
-- Add project task management.
-- Allow removing collaborators.
 
 ---
 
@@ -366,5 +362,4 @@ Currently, two official plugins are available:
 
 ## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your

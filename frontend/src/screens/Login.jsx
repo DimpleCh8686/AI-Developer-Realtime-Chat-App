@@ -12,20 +12,20 @@ const Login = () => {
 
   function submitHandler(e){
     e.preventDefault()
+    
+    axios.post('/users/login', {
+        email,
+        password
+    }).then((res) => {
+    console.log(res.data)
 
-        axios.post('/users/login', {
-            email,
-            password
-        }).then((res) => {
-            console.log(res.data)
-
-            localStorage.setItem('token', res.data.token)
-            setUser(res.data.user)
-            navigate('/')
-        }).catch((err) => {
-            console.log('Error:', err.response.data)
-        })
-    }
+    localStorage.setItem('token', res.data.token)
+    setUser(res.data.user)
+    navigate('/')
+    }).catch((err) => {
+    console.log('Error:', err.response.data)
+    })
+}
 
     return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
