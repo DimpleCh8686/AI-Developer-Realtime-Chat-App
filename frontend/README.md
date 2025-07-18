@@ -316,6 +316,95 @@ Socket logic is in `src/config/socket.js`.
 
 ---
 
+## Real-time Communication & AI Integration
+
+The Project screen now supports **real-time chat** and **AI-powered code assistance** using Socket.io and the backend AI service.
+
+---
+
+### Real-time Chat
+
+- When you open a project, a socket connection is established for that project.
+- All collaborators in the same project room can send and receive messages instantly.
+- Messages are displayed in the chat area, with sender information.
+
+**Example Usage:**
+
+```js
+import { initializeSocket, sendMessage, receiveMessage } from '../config/socket';
+
+// Initialize socket for a project
+const socket = initializeSocket(projectId);
+
+// Send a message to the project room
+sendMessage('project-message', { message: 'Hello team!', sender: user });
+
+// Listen for incoming messages
+receiveMessage('project-message', (data) => {
+    console.log('Received:', data);
+});
+```
+
+---
+
+### AI-powered Code Assistance
+
+- Type a message starting with `@ai` in the chat to get code suggestions, file structures, or answers from the AI assistant.
+- The backend processes the prompt and returns a formatted response, which is rendered in the chat with syntax highlighting.
+
+**Example Usage:**
+
+Type in chat:
+```
+@ai Create a REST API with Express and MongoDB
+```
+
+**Example AI Response:**
+```json
+{
+  "text": "Here is a basic Express REST API setup...",
+  "fileTree": {
+    "app.js": { "contents": "const express = require('express'); ..." },
+    "package.json": { "contents": "{ \"name\": \"rest-api\", ... }" }
+  }
+}
+```
+The response will be rendered with Markdown and code highlighting in the chat.
+
+---
+
+### UI Updates
+
+- **Chat Area:** Displays both user and AI messages. AI messages are rendered with Markdown and syntax highlighting.
+- **Collaborator Panel:** Shows all users in the project.
+- **Modal:** Allows adding new collaborators.
+
+---
+
+### Example Workflow
+
+1. **Open a project** from the dashboard.
+2. **Send a message** in the chat to collaborate in real-time.
+3. **Type `@ai <your prompt>`** to get instant code help from the AI.
+4. **View AI responses** with formatted code and explanations.
+5. **Add collaborators** using the modal.
+
+---
+
+## Notes
+
+- Only authenticated users can access project chat and AI features.
+- Socket.io handles real-time communication; AI responses are fetched from the backend.
+- AI messages are identified by sender `_id: 'ai'` and rendered with Markdown.
+
+---
+
+## Related Files
+
+- `src/screens/Project.jsx` — Project screen with chat and AI integration.
+- `src/config/socket.js` — Socket.io client logic.
+- Backend: `/ai/get-result` endpoint for AI responses.
+
 ## Styling
 
 - **Tailwind CSS** is used for rapid UI development.

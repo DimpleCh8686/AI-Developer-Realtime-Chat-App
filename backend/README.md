@@ -180,6 +180,7 @@ JWT_SECRET=AI_AGENT-secret
 REDIS_HOST=your_redis_host
 REDIS_PORT=your_redis_port
 REDIS_PASSWORD=your_redis_password
+GOOGLE_AI_KEY=your_ai_key
 ```
 
 ## Project Service & Routes
@@ -439,10 +440,6 @@ The backend supports real-time features using Socket.io. This enables future enh
 
 ---
 
-## Extending
-
-To add new real-time features, define new event names and handlers in both the frontend and backend.  
-For example, to add a "task-update" event:
 
 **Frontend:**
 ```js
@@ -458,6 +455,145 @@ socket.on('task-update', (data) => {
   socket.broadcast.to(socket.roomId).emit('task-update', data);
 });
 ```
+
+---
+
+## AI Service & Communication
+
+The backend now includes an **AI Service** powered by Google Generative AI (Gemini 1.5 Flash). This service allows users to interact with an AI assistant for code generation, suggestions, and more, directly from the project chat or via API.
+
+---
+
+### How It Works
+
+- The AI service is initialized in `services/ai.service.js` using your Google AI API key.
+- The AI model is configured to respond in JSON format and follows best coding practices.
+- When a message in the project chat contains `@ai`, the backend extracts the prompt and sends it to the AI service.
+- The AI's response is broadcast to all users in the project room as a chat message from "AI".
+
+---
+
+### API Endpoint
+
+**GET** `/ai/get-result?prompt=your_prompt`
+
+#### Example Request
+
+```sh
+curl "http://localhost:3000/ai/get-result?prompt=Create an express application"
+```
+
+#### Example Response
+
+```json
+{
+  "text": "This is your fileTree structure of the express server",
+  "fileTree": {
+    "app.js": {
+      "contents": "const express = require('express');\nconst app = express();\n..."
+    },
+    "package.json": {
+      "contents": "{ \"name\": \"demo-server\", ... }"
+    }
+  },
+  "buildCommand": {
+    "mainItem": "npm",
+    "commands": ["install"]
+  },
+  "startCommand": {
+    "mainItem": "node",
+    "commands": ["app.js"]
+  }
+}
+```
+
+---
+
+### Using AI in Project Chat
+
+Send a message containing `@ai` in the project chat.  
+Example:  
+```
+@ai Create a REST API with Express and MongoDB
+```
+
+The AI will respond in the chat with code suggestions, file structure, and commands.
+
+---
+
+### Socket.io Integration with AI
+
+When a chat message includes `@ai`, the backend automatically:
+
+1. Extracts the prompt from the message.
+2. Calls the AI service to generate a response.
+3. Emits the AI's response to all users in the project room as a chat message.
+
+**Example Socket Event:**
+
+```js
+// Sent by backend to all users in the room
+{
+  message: "<AI response here>",
+  sender: {
+    _id: "ai",
+    email: "AI"
+  }
+}
+```
+
+---
+
+### Example Workflow
+
+1. **User sends a message in project chat:**  
+   `@ai Generate a Node.js server with authentication`
+
+2. **Backend detects @ai, calls AI service, and broadcasts response.**
+
+3. **All collaborators see the AI's response in the chat.**
+
+---
+
+### Error Handling
+
+- If the AI service fails, users receive an error message in the chat or API response.
+- All exceptions are handled gracefully and logged.
+
+---
+
+## Related Files
+
+- `services/ai.service.js` — AI service logic and integration.
+- `controllers/ai.controller.js` — API controller for AI endpoint.
+- `routes/ai.routes.js` — Express route for AI endpoint.
+- `server.js` — Socket.io logic for AI chat integration.
+
+---
+
+## Example: Get AI Result via API
+
+```sh
+curl "http://localhost:3000/ai/get-result?prompt=Create a MERN stack app"
+```
+
+---
+
+## Example: Get AI Result via Chat
+
+Type in project chat:
+```
+@ai How do I set up JWT authentication in Express?
+```
+The AI will reply with code and instructions.
+
+---
+
+## Notes
+
+- The AI service is available via both HTTP API and real-time chat.
+- Prompts should be clear and specific for best results.
+- The AI always responds with modular, maintainable code and best practices.
 
 ---
 
