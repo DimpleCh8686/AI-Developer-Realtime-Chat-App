@@ -405,6 +405,80 @@ The response will be rendered with Markdown and code highlighting in the chat.
 - `src/config/socket.js` — Socket.io client logic.
 - Backend: `/ai/get-result` endpoint for AI responses.
 
+## WebContainer Integration
+
+The frontend now supports **in-browser code execution and file management** using [WebContainer](https://webcontainer.io/). This allows users to view, edit, and run code directly in the browser, making the project workspace interactive and collaborative.
+
+---
+
+### How It Works
+
+- The WebContainer instance is initialized in `src/config/webContainer.js`.
+- When a project is opened, the file tree received from the backend or AI assistant is mounted into the WebContainer.
+- Users can view and edit code files in the browser. Changes are reflected in the file tree and can be shared with collaborators in real-time.
+
+---
+
+### Example Usage
+
+**Initialize WebContainer:**
+```js
+import { getWebContainer } from '../config/webContainer';
+
+useEffect(() => {
+  getWebContainer().then(container => {
+    setWebContainer(container);
+    console.log("Container started");
+  });
+}, []);
+```
+
+**Mount File Tree:**
+```js
+webContainer.mount(fileTree);
+```
+
+**Edit Code:**
+- Click a file in the explorer to open it.
+- Edit the code in the code editor area.
+- Changes are saved to the file tree and can be sent to collaborators.
+
+---
+
+### UI Updates
+
+- **Explorer Panel:** Shows the file tree structure.
+- **Code Editor:** Allows editing code with syntax highlighting.
+- **Open Files Tabs:** Switch between multiple open files.
+
+---
+
+### Example Workflow
+
+1. **Open a project** to load the file tree.
+2. **Click a file** to view and edit its contents.
+3. **Edit code** in the browser; changes are saved and can be shared.
+4. **Collaborate** with others in real-time using chat and file updates.
+
+---
+
+## Related Files
+
+- `src/config/webContainer.js` — WebContainer initialization and management.
+- `src/screens/Project.jsx` — File tree mounting, code editor, and collaboration logic.
+
+---
+
+## Notes
+
+- WebContainer enables interactive coding experiences directly in the browser.
+- File changes are local to the browser session unless synced via chat or backend.
+- Syntax highlighting is provided using `highlight.js`.
+
+---
+
+---
+
 ## Styling
 
 - **Tailwind CSS** is used for rapid UI development.
