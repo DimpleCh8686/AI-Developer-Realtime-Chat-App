@@ -16,6 +16,7 @@ const model = genAI.getGenerativeModel({
     "text": "This is you fileTree structure of the express server",
     "fileTree":{
       "app.js":{
+        file:{
            contents: "
             const express = require('express');
             const app = express();
@@ -28,9 +29,10 @@ const model = genAI.getGenerativeModel({
                 console.log('Server is running on http://localhost:3000');
             });
             ",
-        },
+          }
     "package.json": {
-            "contents":"
+        file:{
+            contents:"
                 {
                   "name": "demo-server",
                   "version": "1.0.0",
@@ -47,9 +49,9 @@ const model = genAI.getGenerativeModel({
                     "express": "^5.1.0"
                 }
             }
-            "
-          }
-    }
+         "
+        }
+      }
     "buildCommand": {
         mainItem: "npm",
         commands: [ "install" ]
@@ -58,7 +60,7 @@ const model = genAI.getGenerativeModel({
     "startCommand": {
         mainItem: "node",
         commands: [ "app.js" ]
-    }
+        }
     }
     </example>
 
