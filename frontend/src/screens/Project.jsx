@@ -167,7 +167,7 @@ const Project = () => {
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = url;
     a.download = 'chat-history.txt';
     a.click();
