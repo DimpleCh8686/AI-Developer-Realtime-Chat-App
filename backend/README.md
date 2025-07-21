@@ -597,6 +597,114 @@ The AI will reply with code and instructions.
 
 ---
 
+---
+
+### Project File Tree Management & WebContainer Integration
+
+The backend now supports **project file tree management** and is ready for integration with in-browser code execution tools like WebContainer. This allows users to collaboratively manage, update, and share project file structures in real-time.
+
+---
+
+### Project File Tree
+
+Each project stores a `fileTree` object in the database, representing the structure and contents of files and folders for that project.
+
+#### Model Example
+
+```js
+// models/project.model.js
+fileTree: {
+    type: Object,
+    default: {}
+}
+```
+
+---
+
+### API Endpoint: Update File Tree
+
+**PUT** `/projects/update-file-tree`
+
+#### Headers
+
+```
+Authorization: Bearer JWT_TOKEN
+```
+
+#### Request Body
+
+```json
+{
+  "projectId": "project_id",
+  "fileTree": {
+    "app.js": { "contents": "console.log('Hello World');" },
+    "package.json": { "contents": "{ \"name\": \"demo\" }" }
+  }
+}
+```
+
+#### Example (cURL)
+
+```sh
+curl -X PUT http://localhost:3000/projects/update-file-tree \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"projectId":"project_id","fileTree":{"app.js":{"contents":"console.log(\"Hello World\");"}}}'
+```
+
+#### Response
+
+```json
+{
+  "project": {
+    "_id": "project_id",
+    "name": "my first project",
+    "users": ["user_id", "collaborator_id"],
+    "fileTree": {
+      "app.js": { "contents": "console.log('Hello World');" }
+    }
+  }
+}
+```
+
+---
+
+### Example Workflow
+
+1. **Frontend** mounts or edits files in the browser using WebContainer.
+2. **User saves changes**; the updated file tree is sent to the backend via `/projects/update-file-tree`.
+3. **Backend** updates the project document and returns the new file tree.
+4. **All collaborators** see the updated file structure in real-time.
+
+---
+
+### Notes
+
+- Only authenticated users who are part of the project can update the file tree.
+- File tree updates are validated for project and user permissions.
+- This enables collaborative coding, live previews, and in-browser execution with tools like WebContainer.
+
+---
+
+## Related Files
+
+- `models/project.model.js` — Project schema with `fileTree`.
+- `controllers/project.controller.js` — Handles file tree update logic.
+- `services/project.service.js` — Business logic for updating file trees.
+- `routes/project.routes.js` — Route for `/projects/update-file-tree`.
+
+---
+
+## Example Use Case
+
+- **Collaborative Coding:** Multiple users edit files in the browser, and changes are synced to the backend.
+- **AI Integration:** AI-generated file trees can be merged into the project and shared with all collaborators.
+- **Live Preview:** Use WebContainer to run and preview code directly from the updated file tree.
+
+---
+
+##
+
 ## License
 
 ISC

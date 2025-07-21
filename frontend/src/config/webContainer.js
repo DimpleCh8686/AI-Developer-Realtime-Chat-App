@@ -2,9 +2,9 @@ import { WebContainer } from '@webcontainer/api';
 
 let WebContainerInstance = null;
 
-export const getWebContainer = () => {
+export const getWebContainer = async () => {
     if (WebContainerInstance === null) {
-        WebContainerInstance = WebContainer.boot();
+        WebContainerInstance = await WebContainer.boot();
     }
     return WebContainerInstance;
 }

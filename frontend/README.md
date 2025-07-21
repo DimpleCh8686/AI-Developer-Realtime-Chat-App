@@ -10,6 +10,8 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
 - **Responsive UI**: Styled with Tailwind CSS.
 - **API Integration**: Communicates with the backend using Axios.
 - **Protected Routes**: Only authenticated users can access project features.
+- **Real-time Chat & AI Assistance**: Collaborate and get code help instantly.
+- **WebContainer Integration**: Edit and run code in-browser with live preview.
 
 ---
 
@@ -50,9 +52,6 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
    ```
 
    The app will be available at [http://localhost:5173](http://localhost:5173) (default Vite port).
-
----
-
 
 ---
 
@@ -130,13 +129,16 @@ This is the frontend for the **AI_AGENT** project, built with React, Vite, Tailw
 ### 3. Project Details
 
 - **Screen:** `src/screens/Project.jsx`
+
 ## Features
 
 - **View Project Details:** See the project name and its collaborators.
 - **Add Collaborators:** Add other users to your project.
 - **Side Panel:** View a list of all collaborators in a project.
-- **Chat UI (UI only):** Placeholder for future messaging features.
-- **Real-time Communication (Socket.io ready):** Socket setup for future chat/collaboration.
+- **Real-time Communication (Socket.io):** Chat and collaborate instantly.
+- **AI-powered Code Assistance:** Get code suggestions and file structures from the AI assistant.
+- **File Explorer & Editor:** Browse and edit project files in-browser.
+- **WebContainer Integration:** Run and preview code live in the browser.
 
 ---
 
@@ -159,7 +161,10 @@ When you click on a project from the Home screen, you are navigated to the Proje
       "users": [
         { "_id": "user_id", "email": "user@example.com" },
         { "_id": "collaborator_id", "email": "collab@example.com" }
-      ]
+      ],
+      "fileTree": {
+        "app.js": { "file": { "contents": "console.log('Hello World');" } }
+      }
     }
   }
   ```
@@ -220,6 +225,7 @@ The frontend is ready for real-time features (like chat or live collaboration) u
 - **Live Chat:** Users can send and receive messages in real-time.
 - **Collaboration Ready:** The socket setup allows for future features like notifications, collaborative editing, and live updates.
 - **Room-based Messaging:** Only users in the same project receive messages and updates.
+
 Socket logic is in `src/config/socket.js`.
 
 ### Socket Usage
@@ -236,7 +242,7 @@ Socket logic is in `src/config/socket.js`.
 
   ```js
   import { sendMessage } from '../config/socket';
-  sendMessage('eventName', { message: 'Hello' });
+  sendMessage('project-message', { message: 'Hello team!', sender: user });
   ```
 
 - **Receive a Message:**
@@ -244,7 +250,7 @@ Socket logic is in `src/config/socket.js`.
   ```js
   import { receiveMessage } from '../config/socket';
 
-  receiveMessage('eventName', (data) => {
+  receiveMessage('project-message', (data) => {
     // handle incoming data
   });
   ```
@@ -256,9 +262,9 @@ Socket logic is in `src/config/socket.js`.
   useEffect(() => {
     const socket = initializeSocket(project._id);
 
-    receiveMessage('chat', (msg) => {
+    receiveMessage('project-message', (msg) => {
       console.log('Received:', msg);
-      });
+    });
 
     // Cleanup on unmount
     return () => socket.disconnect();
@@ -267,87 +273,7 @@ Socket logic is in `src/config/socket.js`.
 
 ---
 
-## UI Structure
-
-- **Left Panel:** Project info, chat placeholder, and collaborator side panel.
-- **Main Area:** (Extendable for chat, tasks, etc.)
-- **Modal:** For selecting and adding collaborators.
-
----
-
-## Example Workflow
-
-1. **Open a project** from the dashboard.
-2. **View collaborators** in the side panel.
-3. **Add new collaborators** using the modal.
-4. **See the updated list** of collaborators instantly.
-
----
-
-## Notes
-
-- Only authenticated users can access this screen.
-- Collaborator management is done via user IDs.
-- The chat area is currently a UI placeholder.
-
----
-
-## Related API Endpoints
-
-- `GET /projects/get-project/:projectId` — Get project details.
-- `PUT /projects/add-user` — Add collaborators to a project.
-- `GET /users/all` — List all users (for adding as collaborators).
-
----
-
-## Example: Add Collaborator Flow
-
-1. **User opens project:**  
-   Project details and collaborators are loaded.
-
-2. **User clicks "Add collaborator":**  
-   Modal opens with user list.
-
-3. **User selects users and submits:**  
-   API call is made to add users.
-
-4. **Collaborators list updates:**  
-   Side panel shows new collaborators.
-
----
-
-## Real-time Communication & AI Integration
-
-The Project screen now supports **real-time chat** and **AI-powered code assistance** using Socket.io and the backend AI service.
-
----
-
-### Real-time Chat
-
-- When you open a project, a socket connection is established for that project.
-- All collaborators in the same project room can send and receive messages instantly.
-- Messages are displayed in the chat area, with sender information.
-
-**Example Usage:**
-
-```js
-import { initializeSocket, sendMessage, receiveMessage } from '../config/socket';
-
-// Initialize socket for a project
-const socket = initializeSocket(projectId);
-
-// Send a message to the project room
-sendMessage('project-message', { message: 'Hello team!', sender: user });
-
-// Listen for incoming messages
-receiveMessage('project-message', (data) => {
-    console.log('Received:', data);
-});
-```
-
----
-
-### AI-powered Code Assistance
+## AI-powered Code Assistance
 
 - Type a message starting with `@ai` in the chat to get code suggestions, file structures, or answers from the AI assistant.
 - The backend processes the prompt and returns a formatted response, which is rendered in the chat with syntax highlighting.
@@ -364,8 +290,8 @@ Type in chat:
 {
   "text": "Here is a basic Express REST API setup...",
   "fileTree": {
-    "app.js": { "contents": "const express = require('express'); ..." },
-    "package.json": { "contents": "{ \"name\": \"rest-api\", ... }" }
+    "app.js": { "file": { "contents": "const express = require('express'); ..." } },
+    "package.json": { "file": { "contents": "{ \"name\": \"rest-api\", ... }" } }
   }
 }
 ```
@@ -373,53 +299,31 @@ The response will be rendered with Markdown and code highlighting in the chat.
 
 ---
 
-### UI Updates
+## File Explorer & Code Editor
 
-- **Chat Area:** Displays both user and AI messages. AI messages are rendered with Markdown and syntax highlighting.
-- **Collaborator Panel:** Shows all users in the project.
-- **Modal:** Allows adding new collaborators.
+- **Explorer Panel:** Shows the file tree structure for the project.
+- **Code Editor:** Allows editing code with syntax highlighting (powered by `highlight.js`).
+- **Open Files Tabs:** Switch between multiple open files.
 
----
+**Example Usage:**
 
-### Example Workflow
-
-1. **Open a project** from the dashboard.
-2. **Send a message** in the chat to collaborate in real-time.
-3. **Type `@ai <your prompt>`** to get instant code help from the AI.
-4. **View AI responses** with formatted code and explanations.
-5. **Add collaborators** using the modal.
+- Click a file in the explorer to open it.
+- Edit code in the code editor area; changes are saved to the file tree and synced to the backend.
 
 ---
-
-## Notes
-
-- Only authenticated users can access project chat and AI features.
-- Socket.io handles real-time communication; AI responses are fetched from the backend.
-- AI messages are identified by sender `_id: 'ai'` and rendered with Markdown.
-
----
-
-## Related Files
-
-- `src/screens/Project.jsx` — Project screen with chat and AI integration.
-- `src/config/socket.js` — Socket.io client logic.
-- Backend: `/ai/get-result` endpoint for AI responses.
 
 ## WebContainer Integration
 
-The frontend now supports **in-browser code execution and file management** using [WebContainer](https://webcontainer.io/). This allows users to view, edit, and run code directly in the browser, making the project workspace interactive and collaborative.
-
----
+The frontend supports **in-browser code execution and file management** using [WebContainer](https://webcontainer.io/). This allows users to view, edit, and run code directly in the browser, making the project workspace interactive and collaborative.
 
 ### How It Works
 
 - The WebContainer instance is initialized in `src/config/webContainer.js`.
 - When a project is opened, the file tree received from the backend or AI assistant is mounted into the WebContainer.
 - Users can view and edit code files in the browser. Changes are reflected in the file tree and can be shared with collaborators in real-time.
+- You can run the project (e.g., install dependencies and start the server) and preview the result in an embedded iframe.
 
----
-
-### Example Usage
+**Example Usage:**
 
 **Initialize WebContainer:**
 ```js
@@ -438,18 +342,14 @@ useEffect(() => {
 webContainer.mount(fileTree);
 ```
 
-**Edit Code:**
-- Click a file in the explorer to open it.
-- Edit the code in the code editor area.
-- Changes are saved to the file tree and can be sent to collaborators.
-
----
-
-### UI Updates
-
-- **Explorer Panel:** Shows the file tree structure.
-- **Code Editor:** Allows editing code with syntax highlighting.
-- **Open Files Tabs:** Switch between multiple open files.
+**Run Project:**
+```js
+const installProcess = await webContainer.spawn("npm", ["install"]);
+const runProcess = await webContainer.spawn("npm", ["start"]);
+webContainer.on('server-ready', (port, url) => {
+  setIframeUrl(url);
+});
+```
 
 ---
 
@@ -458,24 +358,16 @@ webContainer.mount(fileTree);
 1. **Open a project** to load the file tree.
 2. **Click a file** to view and edit its contents.
 3. **Edit code** in the browser; changes are saved and can be shared.
-4. **Collaborate** with others in real-time using chat and file updates.
+4. **Run the project** and preview the output in-browser.
+5. **Collaborate** with others in real-time using chat and file updates.
 
 ---
 
 ## Related Files
 
-- `src/config/webContainer.js` — WebContainer initialization and management.
-- `src/screens/Project.jsx` — File tree mounting, code editor, and collaboration logic.
-
----
-
-## Notes
-
-- WebContainer enables interactive coding experiences directly in the browser.
-- File changes are local to the browser session unless synced via chat or backend.
-- Syntax highlighting is provided using `highlight.js`.
-
----
+- `src/screens/Project.jsx` — Main project workspace.
+- `src/config/socket.js` — Socket.io client logic.
+- `src/config/webContainer.js` — WebContainer integration for code execution.
 
 ---
 
@@ -483,8 +375,6 @@ webContainer.mount(fileTree);
 
 - **Tailwind CSS** is used for rapid UI development.
 - Custom styles can be added in `src/App.css` and `src/index.css`.
-
----
 
 ---
 
@@ -503,6 +393,7 @@ VITE_API_URL=http://localhost:3000
 - **API errors:** Ensure the backend is running and the URL in `.env` is correct.
 - **Authentication issues:** Check that JWT tokens are stored in `localStorage`.
 - **Styling issues:** Make sure Tailwind CSS is installed and configured.
+- **WebContainer issues:** Ensure your browser supports WebContainer and you are using a compatible environment.
 
 ---
 
@@ -525,4 +416,4 @@ Currently, two official plugins are available:
 
 ## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and
