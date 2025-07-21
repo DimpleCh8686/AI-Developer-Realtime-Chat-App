@@ -12,7 +12,11 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*'
+        origin: [
+            'https://ai-developer-realtime-chat-app-bqy1.vercel.app',
+            'http://localhost:5173'
+        ],
+        methods: ['GET', 'POST']
     }
 });
 
