@@ -11,11 +11,9 @@ import { getWebContainer } from '../config/webcontainer'
 function SyntaxHighlightedCode(props) {
     const ref = useRef(null)
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (ref.current && props.className?.includes('lang-') && window.hljs) {
             window.hljs.highlightElement(ref.current)
-
-            // hljs won't reprocess the element unless this attribute is removed
             ref.current.removeAttribute('data-highlighted')
         }
     }, [ props.className, props.children ])
@@ -30,22 +28,19 @@ const Project = () => {
 
     const [ isSidePanelOpen, setIsSidePanelOpen ] = useState(false)
     const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ selectedUserId, setSelectedUserId ] = useState(new Set()) // Initialized as Set
+    const [ selectedUserId, setSelectedUserId ] = useState(new Set()) 
     const [ project, setProject ] = useState(location.state.project)
     const [ message, setMessage ] = useState('')
     const { user } = useContext(UserContext)
     const messageBox = React.createRef()
 
     const [ users, setUsers ] = useState([])
-    const [ messages, setMessages ] = useState([]) // New state variable for messages
+    const [ messages, setMessages ] = useState([]) 
     const [ fileTree, setFileTree ] = useState({})
-
     const [ currentFile, setCurrentFile ] = useState(null)
     const [ openFiles, setOpenFiles ] = useState([])
-
     const [ webContainer, setWebContainer ] = useState(null)
     const [ iframeUrl, setIframeUrl ] = useState(null)
-
     const [ runProcess, setRunProcess ] = useState(null)
 
     const handleUserClick = (id) => {
@@ -59,13 +54,10 @@ const Project = () => {
 
             return newSelectedUserId;
         });
-
-
     }
 
 
     function addCollaborators() {
-
         axios.put("/projects/add-user", {
             projectId: location.state.project._id,
             users: Array.from(selectedUserId)
@@ -76,7 +68,6 @@ const Project = () => {
         }).catch(err => {
             console.log(err)
         })
-
     }
 
     const send = () => {
@@ -85,15 +76,13 @@ const Project = () => {
             message,
             sender: user
         })
-        setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) // Update messages state
+        setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) 
         setMessage("")
-
     }
 
     function WriteAiMessage(message) {
 
         const messageObject = JSON.parse(message)
-
         return (
             <div
                 className='overflow-auto bg-slate-950 text-white rounded-sm p-2'
@@ -120,28 +109,19 @@ const Project = () => {
             })
         }
 
-
         receiveMessage('project-message', data => {
 
             console.log(data)
-            
             if (data.sender._id == 'ai') {
-
-
                 const message = JSON.parse(data.message)
-
                 console.log(message)
-
                 webContainer?.mount(message.fileTree)
-
                 if (message.fileTree) {
                     setFileTree(message.fileTree || {})
                 }
-                setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
+                setMessages(prevMessages => [ ...prevMessages, data ]) 
             } else {
-
-
-                setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
+                setMessages(prevMessages => [ ...prevMessages, data ]) 
             }
         })
 
@@ -159,11 +139,8 @@ const Project = () => {
             setUsers(res.data.users)
 
         }).catch(err => {
-
             console.log(err)
-
         })
-
     }, [])
 
     function saveFileTree(ft) {
@@ -177,12 +154,25 @@ const Project = () => {
         })
     }
 
-
-    // Removed appendIncomingMessage and appendOutgoingMessage functions
-
     function scrollToBottom() {
         messageBox.current.scrollTop = messageBox.current.scrollHeight
     }
+
+    function downloadChatHistory(messages) {
+      const content = messages.map(msg => {
+      const sender = msg.sender.email || 'Unknown';
+      const text = msg.sender._id === 'ai'? JSON.parse(msg.message)?.text: msg.message;
+      return `${sender}:\n${text}\n\n`;
+    }).join('');
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    a = document.createElement('a');
+    a.href = url;
+    a.download = 'chat-history.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
     return (
         <main className='h-screen w-screen flex'>
@@ -221,6 +211,12 @@ const Project = () => {
                         <button
                             onClick={send}
                             className='px-5 bg-slate-950 text-white'><i className="ri-send-plane-fill"></i></button>
+                          <button
+                          onClick={() => downloadChatHistory(messages)}
+                          className='inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl shadow hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-20'
+                          >
+                          Download
+                         </button>
                     </div>
                 </div>
                 <div className={`sidePanel w-full h-full flex flex-col gap-2 bg-slate-50 absolute transition-all ${isSidePanelOpen ? 'translate-x-0' : '-translate-x-full'} top-0`}>
@@ -237,8 +233,6 @@ const Project = () => {
                     <div className="users flex flex-col gap-2">
 
                         {project.users && project.users.map(user => {
-
-
                             return (
                                 <div className="user cursor-pointer hover:bg-slate-200 p-2 flex gap-2 items-center">
                                     <div className='aspect-square rounded-full w-fit h-fit flex items-center justify-center p-5 text-white bg-slate-600'>
@@ -247,15 +241,12 @@ const Project = () => {
                                     <h1 className='font-semibold text-lg'>{user.email}</h1>
                                 </div>
                             )
-
-
                         })}
                     </div>
                 </div>
             </section>
 
             <section className="right  bg-red-50 flex-grow h-full flex">
-
                 <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
                     <div className="file-tree w-full">
                         {
@@ -271,17 +262,13 @@ const Project = () => {
                                         className='font-semibold text-lg'
                                     >{file}</p>
                                 </button>))
-
                         }
                     </div>
 
                 </div>
 
-
                 <div className="code-editor flex flex-col flex-grow h-full shrink">
-
                     <div className="top flex justify-between w-full">
-
                         <div className="files flex">
                             {
                                 openFiles.map((file, index) => (
@@ -301,12 +288,7 @@ const Project = () => {
                             <button
                                 onClick={async () => {
                                     await webContainer.mount(fileTree)
-
-
                                     const installProcess = await webContainer.spawn("npm", [ "install" ])
-
-
-
                                     installProcess.output.pipeTo(new WritableStream({
                                         write(chunk) {
                                             console.log(chunk)
@@ -318,7 +300,6 @@ const Project = () => {
                                     }
 
                                     let tempRunProcess = await webContainer.spawn("npm", [ "start" ]);
-
                                     tempRunProcess.output.pipeTo(new WritableStream({
                                         write(chunk) {
                                             console.log(chunk)
@@ -331,7 +312,6 @@ const Project = () => {
                                         console.log(port, url)
                                         setIframeUrl(url)
                                     })
-
                                 }}
                                 className='p-2 px-4 bg-slate-300 text-white'
                             >
