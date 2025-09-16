@@ -16,6 +16,7 @@ const io = new Server(server, {
             'https://ai-developer-realtime-chat-app-bqy1.vercel.app',
             'http://localhost:5173'
         ],
+        credentials: true,
         methods: ['GET', 'POST']
     }
 });
