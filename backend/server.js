@@ -13,7 +13,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: [
-            'https://ai-developer-realtime-chat-app-bqy1.vercel.app',
+            'https://ai-developer-realtime-chat-hy6qgio2h.vercel.app',
             'http://localhost:5173'
         ],
         methods: ['GET', 'POST']
