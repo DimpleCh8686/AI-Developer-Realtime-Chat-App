@@ -48,9 +48,9 @@ const Project = () => {
         })
     }
 
-    const addCollaborators = () => {
+    function addCollaborators () {
         axios.put("/projects/add-user", {
-            projectId: project._id,
+            projectId: location.state.project._id,
             users: Array.from(selectedUserId)
         }).then(res => {
             console.log(res.data)
