@@ -288,6 +288,10 @@ const Project = () => {
                         <div className="actions flex gap-2">
                             <button
                                 onClick={async () => {
+                                    if (!webContainer) {
+                                        console.error("WebContainer is not ready yet.");
+                                        return;
+                                    }
                                     await webContainer.mount(fileTree)
                                     const installProcess = await webContainer.spawn("npm", [ "install" ])
                                     installProcess.output.pipeTo(new WritableStream({
