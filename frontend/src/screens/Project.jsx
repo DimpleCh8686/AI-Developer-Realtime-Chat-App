@@ -32,7 +32,7 @@ const Project = () => {
     const [ project, setProject ] = useState(location.state.project)
     const [ message, setMessage ] = useState('')
     const { user } = useContext(UserContext)
-    const messageBox = useRef(null) 
+    const messageBox = useRef(null)
 
     const [ users, setUsers ] = useState([])
     const [ messages, setMessages ] = useState([]) 
@@ -42,8 +42,6 @@ const Project = () => {
     const [ webContainer, setWebContainer ] = useState(null)
     const [ iframeUrl, setIframeUrl ] = useState(null)
     const [ runProcess, setRunProcess ] = useState(null)
-
-    const webContainerRef = useRef(null)
 
     const handleUserClick = (id) => {
         setSelectedUserId(prevSelectedUserId => {
@@ -106,39 +104,21 @@ const Project = () => {
 
         if (!webContainer) {
             getWebContainer().then(container => {
-                webContainerRef.current = container;
                 setWebContainer(container)
                 console.log("container started")
-            }).catch(err => {
-                console.error("WebContainer boot failed:", err)
             })
         }
 
-        receiveMessage('project-message', async (data) => {
+        receiveMessage('project-message', data => {
 
             console.log(data)
             if (data.sender._id == 'ai') {
                 const message = JSON.parse(data.message)
                 console.log(message)
-
-                const container = webContainerRef.current || webContainer;
-
+                webContainer?.mount(message.fileTree)
                 if (message.fileTree) {
-                    if (container) {
-                        try {
-                            const maybePromise = container.mount(message.fileTree)
-                            if (maybePromise && typeof maybePromise.then === 'function') {
-                                await maybePromise
-                            }
-                        } catch (mountErr) {
-                            console.error('WebContainer mount failed:', mountErr)
-                        }
-                        setFileTree(message.fileTree || {})
-                    } else {
-                        setFileTree(message.fileTree || {})
-                    }
+                    setFileTree(message.fileTree || {})
                 }
-
                 setMessages(prevMessages => [ ...prevMessages, data ]) 
             } else {
                 setMessages(prevMessages => [ ...prevMessages, data ]) 
@@ -175,9 +155,7 @@ const Project = () => {
     }
 
     function scrollToBottom() {
-        if (messageBox.current) { 
-            messageBox.current.scrollTop = messageBox.current.scrollHeight
-        }
+        messageBox.current.scrollTop = messageBox.current.scrollHeight
     }
 
     function downloadChatHistory(messages) {
@@ -277,7 +255,8 @@ const Project = () => {
                                     key={index}
                                     onClick={() => {
                                         setCurrentFile(file)
-                                        setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+                                        // setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+                                        setOpenFiles(prevOpenFiles => [...new Set([...prevOpenFiles, file])]);
                                     }}
                                     className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full">
                                     <p
@@ -309,55 +288,31 @@ const Project = () => {
                         <div className="actions flex gap-2">
                             <button
                                 onClick={async () => {
-                                    let container = webContainerRef.current || webContainer;
-                                    if (!container) {
-                                        try {
-                                            const c = await getWebContainer();
-                                            webContainerRef.current = c;
-                                            setWebContainer(c);
-                                            container = c;
-                                        } catch (err) {
-                                            console.error('Cannot run: webcontainer not available', err);
-                                            return;
+                                    await webContainer.mount(fileTree)
+                                    const installProcess = await webContainer.spawn("npm", [ "install" ])
+                                    installProcess.output.pipeTo(new WritableStream({
+                                        write(chunk) {
+                                            console.log(chunk)
                                         }
+                                    }))
+
+                                    if (runProcess) {
+                                        runProcess.kill()
                                     }
 
-                                    try {
-                                        const maybe = container.mount(fileTree)
-                                        if (maybe && typeof maybe.then === 'function') await maybe
-                                    } catch (mountErr) {
-                                        console.error('mount failed', mountErr)
-                                        return
-                                    }
-
-                                    try {
-                                        const installProcess = await container.spawn("npm", [ "install" ])
-                                        installProcess.output.pipeTo(new WritableStream({
-                                            write(chunk) {
-                                                console.log(chunk)
-                                            }
-                                        }))
-
-                                        if (runProcess) {
-                                            runProcess.kill()
+                                    let tempRunProcess = await webContainer.spawn("npm", [ "start" ]);
+                                    tempRunProcess.output.pipeTo(new WritableStream({
+                                        write(chunk) {
+                                            console.log(chunk)
                                         }
+                                    }))
 
-                                        let tempRunProcess = await container.spawn("npm", [ "start" ]);
-                                        tempRunProcess.output.pipeTo(new WritableStream({
-                                            write(chunk) {
-                                                console.log(chunk)
-                                            }
-                                        }))
+                                    setRunProcess(tempRunProcess)
 
-                                        setRunProcess(tempRunProcess)
-
-                                        container.on('server-ready', (port, url) => {
-                                            console.log(port, url)
-                                            setIframeUrl(url)
-                                        })
-                                    } catch (runErr) {
-                                        console.error('run error', runErr)
-                                    }
+                                    webContainer.on('server-ready', (port, url) => {
+                                        console.log(port, url)
+                                        setIframeUrl(url)
+                                    })
                                 }}
                                 className='p-2 px-4 bg-slate-300 text-white'
                             >
