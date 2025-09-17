@@ -12,11 +12,13 @@ const Home = () => {
 
     const navigate = useNavigate()
 
+    const BASE_URL = process.env.VITE_API_URL; 
+
     function createProject(e) {
         e.preventDefault()
         console.log({ projectName })
 
-        axios.post('/projects/create', {
+        axios.post(`${BASE_URL}/projects/create`, {
             name: projectName,
         })
             .then((res) => {
