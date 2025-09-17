@@ -32,7 +32,7 @@ const Project = () => {
     const [ project, setProject ] = useState(location.state.project)
     const [ message, setMessage ] = useState('')
     const { user } = useContext(UserContext)
-    const messageBox = React.createRef()
+    const messageBox = useRef(null)
 
     const [ users, setUsers ] = useState([])
     const [ messages, setMessages ] = useState([]) 
