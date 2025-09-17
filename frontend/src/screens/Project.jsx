@@ -102,7 +102,7 @@ const Project = () => {
             setMessages(prev => [...prev, data])
         })
 
-        axios.get(`/projects/get-project/${project._id}`).then(res => {
+        axios.get(`/projects/get-project/${location.state.project._id}`).then(res => {
             setProject(res.data.project)
             setFileTree(res.data.project.fileTree || {})
         })
