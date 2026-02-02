@@ -155,7 +155,7 @@ IMPORTANT: don't use file name like routes/index.js
 
 export const generateResult = async (prompt) => {
   try {
-    const response = await cohere.chat({
+    const response = await Cohere.chat({
       model: "command-r-plus",
       temperature: 0.4,
       responseFormat: { type: "json_object" },
