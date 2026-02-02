@@ -308,6 +308,23 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect, useContext, useRef } from 'react'
 import { UserContext } from '../context/user.context'
 import { useLocation } from 'react-router-dom'
@@ -506,7 +523,7 @@ const Project = () => {
                     </div>
                 </div>
 
-                <div className="code-editor flex flex-col flex-grow overflow-auto">
+                <div className="code-editor flex flex-col flex-grow h-full shrink">
                     <div className="top flex justify-between w-full">
                         <div className="files flex">
                             {openFiles.map((file, idx) => (
@@ -546,7 +563,7 @@ const Project = () => {
                         </div>
                     </div>
 
-                    <div className="bottom flex flex-grow max-w-full shrink overflow-auto">
+                    <div className="bottom flex flex-row flex-grow max-w-full overflow-hidden">
                         {currentFile && fileTree[currentFile] && (
                             <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
                                 <pre className="hljs h-full">
@@ -575,7 +592,7 @@ const Project = () => {
                     </div>
 
                     {iframeUrl && (
-                        <div className="flex flex-col h-1/2 mt-2">
+                        <div className="flex min-w-96 flex-col h-full">
                             <div className="address-bar">
                                 <input type="text" value={iframeUrl} onChange={e => setIframeUrl(e.target.value)} className="w-full p-2 px-4 bg-slate-200" />
                             </div>
@@ -613,6 +630,3 @@ const Project = () => {
 }
 
 export default Project
-
-
-
