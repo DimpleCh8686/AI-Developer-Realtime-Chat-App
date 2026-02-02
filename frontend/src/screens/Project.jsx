@@ -425,6 +425,7 @@ const Project = () => {
         receiveMessage('project-message', async (data) => {
             if (data.sender._id === 'ai') {
                 const msg = parseCohereMessage(data.message)
+                console.log("AI message parsed:", msg);
                 const container = webContainerRef.current
                 if (msg.fileTree && container) {
                     try {
