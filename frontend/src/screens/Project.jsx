@@ -7,16 +7,23 @@ import Markdown from 'markdown-to-jsx'
 import hljs from 'highlight.js';
 import { getWebContainer } from '../config/webContainer'
 
-function parseCohereJson(message) {
-    // Remove ```json and ``` markdown wrappers
-    const clean = message.replace(/```json/g, '').replace(/```/g, '').trim()
+function parseCohereMessage(message) {
+    if (!message) return { text: '' }
+
+    // Strip markdown code block if present
+    let clean = message.replace(/```json/g, '').replace(/```/g, '').trim()
+
+    // Try to parse JSON, fallback to plain text
     try {
-        return JSON.parse(clean)
+        const parsed = JSON.parse(clean)
+        // Ensure it has a text property
+        return parsed?.text ? parsed : { text: clean }
     } catch (err) {
-        console.error("Failed to parse Cohere message:", clean)
-        return { text: clean } // fallback to raw text
+        // Plain text fallback
+        return { text: clean }
     }
 }
+
 
 
 function SyntaxHighlightedCode(props) {
