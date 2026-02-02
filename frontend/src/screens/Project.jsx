@@ -1116,7 +1116,7 @@ const Project = () => {
             </section>
 
             {/* Right Panel */}
-            <section className="right bg-red-50 flex-grow h-full flex flex-col">
+            <section className="right bg-red-50 flex-grow h-full flex">
                 <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
                     <div className="file-tree w-full">
                         {Object.keys(fileTree).map((file, idx) => (
