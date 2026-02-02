@@ -1116,7 +1116,7 @@ const Project = () => {
             </section>
 
             {/* Right Panel */}
-            <section className="right bg-red-50 flex-grow h-full flex">
+            <section className="right bg-red-50 flex-grow h-full flex flex-col">
                 <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
                     <div className="file-tree w-full">
                         {Object.keys(fileTree).map((file, idx) => (
@@ -1196,11 +1196,11 @@ const Project = () => {
                     </div>
 
                     {iframeUrl && (
-                        <div className="iframe-container flex-shrink-0 w-1/2 h-full flex flex-col">
+                        <div className="flex min-w-96 flex-col h-full">
                             <div className="address-bar">
                                 <input type="text" value={iframeUrl} onChange={e => setIframeUrl(e.target.value)} className="w-full p-2 px-4 bg-slate-200" />
                             </div>
-                            <iframe src={iframeUrl} className="w-full h-full border"></iframe>
+                            <iframe src={iframeUrl} className="w-full h-full"></iframe>
                         </div>
                     )}
                 </div>
@@ -1234,4 +1234,5 @@ const Project = () => {
 }
 
 export default Project
+
 
