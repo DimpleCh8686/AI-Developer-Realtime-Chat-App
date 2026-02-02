@@ -1196,11 +1196,11 @@ const Project = () => {
                     </div>
 
                     {iframeUrl && (
-                        <div className="flex min-w-96 flex-col h-full">
+                        <div className="iframe-container flex-shrink-0 w-1/2 h-full flex flex-col">
                             <div className="address-bar">
                                 <input type="text" value={iframeUrl} onChange={e => setIframeUrl(e.target.value)} className="w-full p-2 px-4 bg-slate-200" />
                             </div>
-                            <iframe src={iframeUrl} className="w-full h-full"></iframe>
+                            <iframe src={iframeUrl} className="w-full h-full border"></iframe>
                         </div>
                     )}
                 </div>
