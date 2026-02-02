@@ -84,7 +84,7 @@ const Project = () => {
     }
 
     const WriteAiMessage = (message) => {
-        const msgObj = parseCohereJson(message)
+        const msgObj = parseCohereMessage(message)
         return (
             <div className='overflow-auto bg-slate-950 text-white rounded-sm p-2'>
                 <Markdown children={msgObj.text} options={{ overrides: { code: SyntaxHighlightedCode } }} />
@@ -105,21 +105,22 @@ const Project = () => {
         }
 
         receiveMessage('project-message', async (data) => {
-            console.log(data)
             if (data.sender._id === 'ai') {
-                const msg = JSON.parse(data.message)
+                const msg = parseCohereMessage(data.message) 
                 const container = webContainerRef.current
-                if (msg.fileTree && container) {
-                    try {
-                        await container.mount(msg.fileTree)
-                    } catch (err) {
-                        console.error('WebContainer mount failed:', err)
+                    if (msg.fileTree && container) {
+                        try {
+                            await container.mount(msg.fileTree)
+                        } catch (err) {
+                            console.error('WebContainer mount failed:', err)
+                        }
+                        setFileTree(msg.fileTree)
                     }
-                    setFileTree(msg.fileTree)
-                }
+                data.message = msg.text
             }
             setMessages(prev => [...prev, data])
         })
+
 
         axios.get(`/projects/get-project/${location.state.project._id}`).then(res => {
             setProject(res.data.project)
@@ -138,7 +139,7 @@ const Project = () => {
     const downloadChatHistory = (messages) => {
         const content = messages.map(msg => {
             const sender = msg.sender.email || 'Unknown'
-            const text = msg.sender._id === 'ai' ? parseCohereJson(msg.message)?.text : msg.message
+            const text = msg.sender._id === 'ai' ? parseCohereMessage(msg.message)?.text : msg.message
             return `${sender}:\n${text}\n\n`
         }).join('')
         const blob = new Blob([content], { type: 'text/plain' })
