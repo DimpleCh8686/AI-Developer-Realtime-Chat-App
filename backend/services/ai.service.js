@@ -155,38 +155,90 @@ response: {
 IMPORTANT: don't use file name like routes/index.js
 `;
 
+// export const generateResult = async (prompt) => {
+//   try {
+//     const response = await cohere.chat({
+//       model: "command-a-03-2025",
+//       messages: [
+//         { role: "system", content: SYSTEM_INSTRUCTION },
+//         { role: "user", content: prompt },
+//       ],
+//     });
+
+//     // In v2, the response message content is an array of objects
+//     const contentArray = response?.message?.content;
+
+//     if (!contentArray || !contentArray.length) {
+//       console.error("Cohere returned empty content:", response);
+//       throw new Error("Cohere returned empty content");
+//     }
+
+//     // Each item may have a 'text' property
+//     const textParts = contentArray
+//       .map((item) => item?.text)
+//       .filter(Boolean); // remove undefined/null
+
+//     if (!textParts.length) {
+//       console.error("Cohere returned content with no text:", response);
+//       throw new Error("Cohere returned content with no text");
+//     }
+
+//     // Combine all text parts into a single string
+//     return textParts.join("\n");
+//   } catch (error) {
+//     console.error("Cohere Generation Error:", error);
+//     throw new Error("Failed to generate response from Cohere");
+//   }
+// };
+
+
 export const generateResult = async (prompt) => {
   try {
     const response = await cohere.chat({
       model: "command-a-03-2025",
       messages: [
-        { role: "system", content: SYSTEM_INSTRUCTION },
-        { role: "user", content: prompt },
+        {
+          role: "system",
+          content: SYSTEM_INSTRUCTION + `
+IMPORTANT RULES:
+- Respond ONLY with valid JSON
+- Do NOT include markdown
+- Do NOT include explanations outside JSON
+- The response MUST be parseable by JSON.parse()
+`
+        },
+        { role: "user", content: prompt }
       ],
     });
 
-    // In v2, the response message content is an array of objects
     const contentArray = response?.message?.content;
 
-    if (!contentArray || !contentArray.length) {
-      console.error("Cohere returned empty content:", response);
-      throw new Error("Cohere returned empty content");
+    if (!contentArray?.length) {
+      throw new Error("Empty Cohere response");
     }
 
-    // Each item may have a 'text' property
-    const textParts = contentArray
-      .map((item) => item?.text)
-      .filter(Boolean); // remove undefined/null
+    // Combine text parts
+    const rawText = contentArray
+      .map(item => item?.text)
+      .filter(Boolean)
+      .join("")
+      .trim();
 
-    if (!textParts.length) {
-      console.error("Cohere returned content with no text:", response);
-      throw new Error("Cohere returned content with no text");
+    // 🔥 FORCE JSON PARSE HERE
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch (err) {
+      console.error("❌ Cohere did NOT return valid JSON:", rawText);
+      throw new Error("Cohere response is not valid JSON");
     }
 
-    // Combine all text parts into a single string
-    return textParts.join("\n");
+    // Always return STRINGIFIED JSON to frontend
+    return JSON.stringify(parsed);
+
   } catch (error) {
     console.error("Cohere Generation Error:", error);
-    throw new Error("Failed to generate response from Cohere");
+    throw error;
   }
 };
+
