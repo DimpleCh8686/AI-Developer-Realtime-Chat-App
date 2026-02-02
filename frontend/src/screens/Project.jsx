@@ -362,6 +362,25 @@ function SyntaxHighlightedCode({ children, className }) {
     return <code ref={ref} className={className}>{children}</code>
 }
 
+function normalizeFileTree(rawTree = {}) {
+    const normalized = {}
+
+    Object.entries(rawTree).forEach(([fileName, value]) => {
+        if (value?.file?.contents !== undefined) {
+            normalized[fileName] = value
+        } else if (value?.contents !== undefined) {
+            normalized[fileName] = {
+                file: {
+                    contents: value.contents
+                }
+            }
+        }
+    })
+
+    return normalized
+}
+
+
 const Project = () => {
     const location = useLocation()
     const { user } = useContext(UserContext)
@@ -429,17 +448,28 @@ const Project = () => {
                 const container = webContainerRef.current
                 if (msg.fileTree && container) {
                     try {
-                        await container.mount(msg.fileTree)
-                        setFileTree(msg.fileTree)
-                    } catch (err) { console.error(err) }
+                        const normalizedTree = normalizeFileTree(msg.fileTree)
+                        console.log("FINAL fileTree", normalizedTree)
+                            await container.mount(normalizedTree)
+                                setFileTree(normalizedTree)
+                                    saveFileTree(normalizedTree)
+                    } catch (err) {
+                        console.error(err)
+                    }
                 }
                 data.message = msg.text
             }
             setMessages(prev => [...prev, data])
         })
 
-        axios.get(`/projects/get-project/${project._id}`)
-            .then(res => setFileTree(res.data.project.fileTree || {}))
+        // axios.get(`/projects/get-project/${project._id}`)
+        //     .then(res => setFileTree(res.data.project.fileTree || {}))
+            axios.get(`/projects/get-project/${project._id}`)
+                .then(res => {
+                    const normalizedTree = normalizeFileTree(res.data.project.fileTree)
+                        setFileTree(normalizedTree)
+                })
+
             .catch(console.log)
 
         axios.get('/users/all')
@@ -557,7 +587,7 @@ const Project = () => {
           saveFileTree(ft)
         }}
       >
-        {fileTree[currentFile].file.contents}
+        {fileTree[currentFile].file?.contents || ''}
       </code>
     </pre>
   </div>
