@@ -538,24 +538,30 @@ const Project = () => {
 
                     <div className="bottom flex flex-grow max-w-full shrink overflow-auto">
                         {currentFile && fileTree[currentFile] && (
-                            <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
-                                <pre className="hljs h-full">
-                                    <code
-                                        className="hljs h-full outline-none"
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                            const ft = { ...fileTree, [currentFile]: { contents: e.target.innerText } }
-                                            setFileTree(ft)
-                                            saveFileTree(ft)
-                                        }}
-                                    >
-                                        {fileTree[currentFile].contents}
-                                    </code>
-                                </pre>
-                            </div>
-                        )}
-                    </div>
+  <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
+    <pre className="hljs h-full">
+      <code
+        className="hljs h-full outline-none"
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={(e) => {
+          const ft = {
+            ...fileTree,
+            [currentFile]: {
+              file: {
+                contents: e.target.innerText
+              }
+            }
+          }
+          setFileTree(ft)
+          saveFileTree(ft)
+        }}
+      >
+        {fileTree[currentFile].file.contents}
+      </code>
+    </pre>
+  </div>
+)}
                 </div>
 
                 {iframeUrl && (
