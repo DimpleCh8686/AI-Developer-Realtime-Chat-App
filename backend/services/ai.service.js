@@ -107,9 +107,11 @@
 
 
 
-import Cohere from "cohere-ai";
+import { CohereClientV2 } from "cohere-ai";
 
-Cohere.init(process.env.COHERE_API_KEY);
+const cohere = new CohereClientV2({
+  token: process.env.COHERE_API_KEY,
+});
 
 const SYSTEM_INSTRUCTION = `
 You are an expert in MERN and Development. You have an experience of 10 years in the development.
@@ -155,23 +157,16 @@ IMPORTANT: don't use file name like routes/index.js
 
 export const generateResult = async (prompt) => {
   try {
-    const response = await Cohere.chat({
+    const response = await cohere.chat({
       model: "command-r-plus",
-      temperature: 0.4,
-      responseFormat: { type: "json_object" },
       messages: [
-        {
-          role: "system",
-          content: SYSTEM_INSTRUCTION,
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
+        { role: "system", content: SYSTEM_INSTRUCTION },
+        { role: "user", content: prompt },
       ],
     });
 
-    return response.message.content[0].text;
+    // v2 SDK returns text in response.output[0].content
+    return response.output[0].content;
   } catch (error) {
     console.error("Cohere Generation Error:", error);
     throw new Error("Failed to generate response from Cohere");
