@@ -7,6 +7,18 @@ import Markdown from 'markdown-to-jsx'
 import hljs from 'highlight.js';
 import { getWebContainer } from '../config/webContainer'
 
+function parseCohereJson(message) {
+    // Remove ```json and ``` markdown wrappers
+    const clean = message.replace(/```json/g, '').replace(/```/g, '').trim()
+    try {
+        return JSON.parse(clean)
+    } catch (err) {
+        console.error("Failed to parse Cohere message:", clean)
+        return { text: clean } // fallback to raw text
+    }
+}
+
+
 function SyntaxHighlightedCode(props) {
     const ref = useRef(null)
 
@@ -65,7 +77,7 @@ const Project = () => {
     }
 
     const WriteAiMessage = (message) => {
-        const msgObj = JSON.parse(message)
+        const msgObj = parseCohereJson(message)
         return (
             <div className='overflow-auto bg-slate-950 text-white rounded-sm p-2'>
                 <Markdown children={msgObj.text} options={{ overrides: { code: SyntaxHighlightedCode } }} />
@@ -119,7 +131,7 @@ const Project = () => {
     const downloadChatHistory = (messages) => {
         const content = messages.map(msg => {
             const sender = msg.sender.email || 'Unknown'
-            const text = msg.sender._id === 'ai' ? JSON.parse(msg.message)?.text : msg.message
+            const text = msg.sender._id === 'ai' ? parseCohereJson(msg.message)?.text : msg.message
             return `${sender}:\n${text}\n\n`
         }).join('')
         const blob = new Blob([content], { type: 'text/plain' })
