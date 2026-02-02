@@ -165,7 +165,12 @@ export const generateResult = async (prompt) => {
       ],
     });
 
-    // v2 SDK returns text in response.output[0].content
+    // Check if response is valid
+    if (!response?.output?.length) {
+      console.error("Cohere returned empty output:", response);
+      throw new Error("Cohere returned empty output");
+    }
+
     return response.output[0].content;
   } catch (error) {
     console.error("Cohere Generation Error:", error);
