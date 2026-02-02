@@ -165,13 +165,26 @@ export const generateResult = async (prompt) => {
       ],
     });
 
-    // Check if response is valid
-    if (!response?.output?.length) {
-      console.error("Cohere returned empty output:", response);
-      throw new Error("Cohere returned empty output");
+    // In v2, the response message content is an array of objects
+    const contentArray = response?.message?.content;
+
+    if (!contentArray || !contentArray.length) {
+      console.error("Cohere returned empty content:", response);
+      throw new Error("Cohere returned empty content");
     }
 
-    return response.output[0].content;
+    // Each item may have a 'text' property
+    const textParts = contentArray
+      .map((item) => item?.text)
+      .filter(Boolean); // remove undefined/null
+
+    if (!textParts.length) {
+      console.error("Cohere returned content with no text:", response);
+      throw new Error("Cohere returned content with no text");
+    }
+
+    // Combine all text parts into a single string
+    return textParts.join("\n");
   } catch (error) {
     console.error("Cohere Generation Error:", error);
     throw new Error("Failed to generate response from Cohere");
