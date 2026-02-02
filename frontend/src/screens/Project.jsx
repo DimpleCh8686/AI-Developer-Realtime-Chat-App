@@ -7,20 +7,39 @@ import Markdown from 'markdown-to-jsx'
 import hljs from 'highlight.js';
 import { getWebContainer } from '../config/webContainer'
 
+// function parseCohereMessage(message) {
+//     if (!message) return { text: '' }
+
+//     // Strip markdown code block if present
+//     let clean = message.replace(/```json/g, '').replace(/```/g, '').trim()
+
+//     // Try to parse JSON, fallback to plain text
+//     try {
+//         const parsed = JSON.parse(clean)
+//         // Ensure it has a text property
+//         return parsed?.text ? parsed : { text: clean }
+//     } catch (err) {
+//         // Plain text fallback
+//         return { text: clean }
+//     }
+// }
+
 function parseCohereMessage(message) {
-    if (!message) return { text: '' }
+    if (!message) return { text: '', fileTree: null }
 
     // Strip markdown code block if present
     let clean = message.replace(/```json/g, '').replace(/```/g, '').trim()
 
-    // Try to parse JSON, fallback to plain text
     try {
         const parsed = JSON.parse(clean)
-        // Ensure it has a text property
-        return parsed?.text ? parsed : { text: clean }
+        // Ensure it has text and optional fileTree
+        return {
+            text: parsed.text || clean,
+            fileTree: parsed.fileTree || null
+        }
     } catch (err) {
         // Plain text fallback
-        return { text: clean }
+        return { text: clean, fileTree: null }
     }
 }
 
@@ -104,22 +123,43 @@ const Project = () => {
                 .catch(err => console.error("WebContainer boot failed:", err))
         }
 
+        // receiveMessage('project-message', async (data) => {
+        //     if (data.sender._id === 'ai') {
+        //         const msg = parseCohereMessage(data.message) 
+        //         const container = webContainerRef.current
+        //             if (msg.fileTree && container) {
+        //                 try {
+        //                     await container.mount(msg.fileTree)
+        //                 } catch (err) {
+        //                     console.error('WebContainer mount failed:', err)
+        //                 }
+        //                 setFileTree(msg.fileTree)
+        //             }
+        //         data.message = msg.text
+        //     }
+        //     setMessages(prev => [...prev, data])
+        // })
+
         receiveMessage('project-message', async (data) => {
-            if (data.sender._id === 'ai') {
-                const msg = parseCohereMessage(data.message) 
-                const container = webContainerRef.current
-                    if (msg.fileTree && container) {
-                        try {
-                            await container.mount(msg.fileTree)
-                        } catch (err) {
-                            console.error('WebContainer mount failed:', err)
-                        }
-                        setFileTree(msg.fileTree)
-                    }
-                data.message = msg.text
+    if (data.sender._id === 'ai') {
+        const msg = parseCohereMessage(data.message)
+        const container = webContainerRef.current
+
+        if (msg.fileTree && container) {
+            try {
+                await container.mount(msg.fileTree)
+                setFileTree(msg.fileTree) // <-- now it will work
+            } catch (err) {
+                console.error('WebContainer mount failed:', err)
             }
-            setMessages(prev => [...prev, data])
-        })
+        }
+
+        data.message = msg.text // show text in chat
+    }
+
+    setMessages(prev => [...prev, data])
+})
+
 
 
         axios.get(`/projects/get-project/${location.state.project._id}`).then(res => {
