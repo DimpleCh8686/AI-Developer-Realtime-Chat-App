@@ -109,9 +109,7 @@
 
 import Cohere from "cohere-ai";
 
-const cohere = new Cohere({
-  apiKey: process.env.COHERE_API_KEY,
-});
+cohere.init(process.env.COHERE_API_KEY);
 
 const SYSTEM_INSTRUCTION = `
 You are an expert in MERN and Development. You have an experience of 10 years in the development.
